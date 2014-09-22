@@ -6,22 +6,69 @@ class SequenceAnalyser
 {
     private $sequence = null;
 
+    private $min = null;
+
+    private $max = null;
+
+    private $elementCount = null;
+
+    private $average = null;
+
     public function __construct(Sequence $sequence)
     {
         $this->sequence = $sequence;
     }
 
-    public function getSequenceMax()
+    private function runAnalyser()
     {
+        $sum = 0;
         $elements = $this->sequence->getElements();
-        $max = $elements[0];
+        $this->max = $this->min = $elements[0];
+        $this->elementCount = count($elements);
         foreach ($elements as $element)
         {
-            if ($element > $max)
+            $sum = $sum + $element;
+            if ($element > $this->max)
             {
-                $max = $element;
+                $this->max = $element;
+            }
+            if ($element < $this->min)
+            {
+                $this->min = $element;
             }
         }
-        return $max;
+        $this->average = $sum / $this->elementCount;
+    }
+
+    private function returnOrCalculate($value)
+    {
+        if (is_null($this->$value))
+        {
+            $this->runAnalyser();
+        }
+    }
+
+    public function getSequenceMax()
+    {
+        $this->returnOrCalculate('max');
+        return $this->max;
+    }
+
+    public function getSequenceMin()
+    {
+        $this->returnOrCalculate('min');
+        return $this->min;
+    }
+
+    public function getSequenceAverage()
+    {
+        $this->returnOrCalculate('average');
+        return $this->average;
+    }
+
+    public function getSequenceElementCount()
+    {
+        $this->returnOrCalculate('elementCount');
+        return $this->elementCount;
     }
 }
