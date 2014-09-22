@@ -18,6 +18,10 @@ class Sequence
 
     public function validateElements()
     {
+        if (empty($this->elements))
+        {
+            return false;
+        }
         foreach($this->elements as $element)
         {
             if(!is_int($element))
