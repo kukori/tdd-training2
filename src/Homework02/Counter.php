@@ -51,7 +51,10 @@ class Counter
 		{
 			$isCaptchaNeeded = true;
 		}
-		return array($loginResult, $isCaptchaNeeded);
+		return array(
+			'loginResult'   => $loginResult,
+			'captchaNeeded' => $isCaptchaNeeded
+		);
 	}
 
 	/**
@@ -68,7 +71,7 @@ class Counter
 			$this->persistence->remove($key);
 			$count = 0;
 		}
-	else
+		else
 		{
 			$count = $this->persistence->get($key);
 			if (empty($count))

@@ -21,12 +21,12 @@ class CounterTest extends \PHPUnit_Framework_TestCase
 		$username = 'ati';
 		$password = 'password';
 		$ip = '123.123.213.213';
-		$this->assertFalse($counter->login($username, $password, $ip), array(false, true));
+		$this->assertEquals($counter->login($username, $password, $ip), array('loginResult' => false, 'captchaNeeded' => true));
 	}
 
 	public function getAuthenticationMock($result = true)
 	{
-		$authenticationMock = $this->getMock('Tdd\Homework02\Authentication');
+		$authenticationMock = $this->getMock('Tdd\Homework02\Authentication', array('login'));
 		$authenticationMock->expects($this->any())->method('login')->will($this->returnValue($result));
 
 		return $authenticationMock;
@@ -34,7 +34,7 @@ class CounterTest extends \PHPUnit_Framework_TestCase
 
 	public function getPersistenceMock($count = 0)
 	{
-		$persistenceMock = $this->getMock('Tdd\Homework02\Persistence');
+		$persistenceMock = $this->getMock('Tdd\Homework02\Persistence', array('remove', 'get', 'put'));
 		$persistenceMock->expects($this->any())->method('remove');
 		$persistenceMock->expects($this->any())->method('get')->will($this->returnValue($count));
 		$persistenceMock->expects($this->any())->method('put');
