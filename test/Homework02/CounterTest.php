@@ -9,54 +9,77 @@
 use Tdd\Homework02\Counter;
 class CounterTest extends \PHPUnit_Framework_TestCase
 {
-
-	public function testCheckIpForCaptcha()
+	/**
+	 * @param $username
+	 * @param $password
+	 * @param $ip
+	 * @param $loginResult
+	 * @param $userCountry
+	 * @param $ipCount
+	 * @param $ipRangeCount
+	 * @param $ipCountryCount
+	 * @param $usernameCount
+	 * @param $ipRange
+	 * @param $ipCountry
+	 * @param $result
+	 *
+	 * @dataProvider checkIpForCaptchaDataProvider
+	 */
+	public function testCheckIpForCaptcha($username, $password, $ip, $loginResult, $userCountry, $ipCount, $ipRangeCount, $ipCountryCount, $usernameCount, $ipRange, $ipCountry, $result )
 	{
-		$auth = $this->getAuthenticationMock(false);
-		$persistence = $this->getPersistenceMock(2);
-		$ipRangeCalculator = $this->getIpRangeCalculatorMock();
-		$geoIpLookup =  $this->getGeoIpLookupMock();
+		$auth = $this->getAuthenticationMock($loginResult, $userCountry);
+		$persistence = $this->getPersistenceMock($ipCount, $ipRangeCount, $ipCountryCount, $usernameCount);
+		$ipRangeCalculator = $this->getIpRangeCalculatorMock($ipRange);
+		$geoIpLookup =  $this->getGeoIpLookupMock($ipCountry);
 
 		$counter = new Counter($auth, $persistence, $ipRangeCalculator, $geoIpLookup);
-		$username = 'ati';
-		$password = 'password';
-		$ip = '123.123.213.213';
-		$this->assertEquals($counter->login($username, $password, $ip), array('loginResult' => false, 'captchaNeeded' => true));
+		$this->assertEquals($counter->login($username, $password, $ip), $result);
 	}
 
-	public function getAuthenticationMock($result = true)
+	public function getAuthenticationMock($loginResult = true, $userCountry = 'US')
 	{
-		$authenticationMock = $this->getMock('Tdd\Homework02\Authentication', array('login'));
-		$authenticationMock->expects($this->any())->method('login')->will($this->returnValue($result));
+		$authenticationMock = $this->getMock('Tdd\Homework02\Authentication', array('login', 'getUserRegCountry'));
+		$authenticationMock->expects($this->any())->method('login')->will($this->returnValue($loginResult));
+		$authenticationMock->expects($this->any())->method('getUserRegCountry')->will($this->returnValue($userCountry));
 
 		return $authenticationMock;
 	}
 
-	public function getPersistenceMock($count = 0)
+	public function getPersistenceMock($ipCount = 0, $ipRangeCount = 0, $ipCountryCount = 0, $usernameCount = 0)
 	{
 		$persistenceMock = $this->getMock('Tdd\Homework02\Persistence', array('remove', 'get', 'put'));
 		$persistenceMock->expects($this->any())->method('remove');
-		$persistenceMock->expects($this->any())->method('get')->will($this->returnValue($count));
+		$persistenceMock->expects($this->any())->method('get')->will($this->onConsecutiveCalls($ipCount, $ipRangeCount, $ipCountryCount, $usernameCount));
 		$persistenceMock->expects($this->any())->method('put');
 
 		return $persistenceMock;
 	}
 
-	public function getIpRangeCalculatorMock()
+	public function getIpRangeCalculatorMock($ipRange = 'blabla')
 	{
-		$ipRangeCalculatorMock = $this->getMock('Tdd\Homework02\IpRangeCalculator');
-		//$ipRangeCalculatorMock->expects($this->any())->method('login')->will($this->returnValue($result));
+		$ipRangeCalculatorMock = $this->getMock('Tdd\Homework02\IpRangeCalculator', array('calculateIpRange'));
+		$ipRangeCalculatorMock->expects($this->any())->method('calculateIpRange')->will($this->returnValue($ipRange));
 
 		return $ipRangeCalculatorMock;
 	}
 
-	public function getGeoIpLookupMock()
+	public function getGeoIpLookupMock($ipCountry = 'US')
 	{
-		$geoIpLookupMock = $this->getMock('Tdd\Homework02\GeoIpLookup');
-		//$geoIpLookupMock->expects($this->any())->method('login')->will($this->returnValue($result));
+		$geoIpLookupMock = $this->getMock('Tdd\Homework02\GeoIpLookup', array('getCountry'));
+		$geoIpLookupMock->expects($this->any())->method('getCountry')->will($this->returnValue($ipCountry));
 
 		return $geoIpLookupMock;
 	}
 
-
+	public function checkIpForCaptchaDataProvider()
+	{
+		return array(
+			array('ati', 'password', '192.168.4.17', false, 'US', 2, 0, 0, 0, 'blabla', 'US', array('loginResult' => false, 'captchaNeeded' => true)),
+			array('ati', 'password', '192.168.4.17', false, 'US', 1, 499, 0, 0, 'blabla', 'US', array('loginResult' => false, 'captchaNeeded' => true)),
+			array('ati', 'password', '192.168.4.17', false, 'US', 1, 0, 999, 0, 'blabla', 'US', array('loginResult' => false, 'captchaNeeded' => true)),
+			array('ati', 'password', '192.168.4.17', false, 'US', 1, 0, 0, 2, 'blabla', 'US', array('loginResult' => false, 'captchaNeeded' => true)),
+			array('ati', 'password', '192.168.4.17', false, 'US', 0, 0, 0, 0, 'blabla', 'HU', array('loginResult' => false, 'captchaNeeded' => true)),
+			array('ati', 'password', '192.168.4.17', true, 'US', 2, 499, 999, 2, 'blabla', 'US', array('loginResult' => true, 'captchaNeeded' => false)),
+		);
+	}
 }
