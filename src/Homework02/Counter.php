@@ -44,15 +44,14 @@ class Counter
 	 * Login.
 	 *
 	 * @param string $username
-	 * @param string $password
 	 * @param string $ip
+	 * @param bool $loginResult
 	 *
-	 * @return array
+	 * @return bool
 	 */
-	public function login($username, $password, $ip)
+	public function captchaNeeded($username, $ip, $loginResult)
 	{
 		$isCaptchaNeeded = false;
-		$loginResult = $this->authentication->login($username, $password);
 		$ipCount = $this->calculateLoginPerKey($loginResult, self::PERSISTENCE_KEY_LOGIN_PER_IP . $ip);
 
 		$ipRange = $this->ipRangeCalculator->calculateIpRange($ip);
@@ -72,12 +71,9 @@ class Counter
 		)
 		{
 			$isCaptchaNeeded = true;
-			$this->persistence->put(true, self::PERSISTENCE_KEY_IS_CAPTCHA_ON);
+			//$this->persistence->put(true, self::PERSISTENCE_KEY_IS_CAPTCHA_ON);
 		}
-		return array(
-			'loginResult'   => $loginResult,
-			'captchaNeeded' => $isCaptchaNeeded
-		);
+		return $isCaptchaNeeded;
 	}
 
 	/**
