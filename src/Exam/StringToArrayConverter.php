@@ -6,9 +6,26 @@ class StringToArrayConverter
 {
 	public function convert($string)
 	{
+		$result = array();
 		$this->validateString($string);
+		$subResults = explode("\n", $string);
+		if (count($subResults) === 1)
+		{
+			$result = $this->explodeAndTrim($string);
+		}
+		else
+		{
+			foreach($subResults as $subResult)
+			{
+				$result[] = $this->explodeAndTrim($subResult);
+			}
+		}
+		return $result;
+	}
 
-		return explode(',', $string);
+	public function explodeAndTrim($string)
+	{
+		return explode(',', trim($string));
 	}
 
 	private function validateString($string)
