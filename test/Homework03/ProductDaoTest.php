@@ -9,15 +9,15 @@
 use Tdd\Homework03\ProductDao;
 class ProductDaoTest extends \PHPUnit_Framework_TestCase
 {
-//	public function testCreate()
-//	{
-//		$ean  = 'ean' . time();
-//		$name = 'name' . time();
-//
-//		$product = $this->getProductMock($ean, $name);
-//		$productDao = new ProductDao($this->getPDO());
-//		$this->assertTrue($productDao->create($product));
-//	}
+	public function testCreate()
+	{
+		$ean  = 'ean' . time();
+		$name = 'name' . time();
+
+		$product = $this->getProductMock($ean, $name);
+		$productDao = new ProductDao($this->getPDO());
+		$this->assertTrue($productDao->create($product));
+	}
 
 	public function testGetByEAN()
 	{
@@ -40,6 +40,14 @@ class ProductDaoTest extends \PHPUnit_Framework_TestCase
 		$product = $productDao->getById($id);
 		$product->name = 'updated updated turkey product';
 		$this->assertEquals(true, $productDao->modify($product));
+	}
+
+	public function testDelete()
+	{
+		$id = 5;
+		$productDao = new ProductDao($this->getPDO());
+		$product = $productDao->getById($id);
+		$this->assertEquals(true, $productDao->delete($product));
 	}
 
 	public function getProductMock($ean, $name)
