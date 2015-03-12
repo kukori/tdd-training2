@@ -42,6 +42,14 @@ class StringToArrayConverterTest extends \PHPUnit_Framework_TestCase
 			array('a,b,c', array('a', 'b', 'c')),
 			array('100,982,444,990,1', array('100', '982', '444', '990', '1')),
 			array('Mark,Anthony,marka@lib.de', array('Mark', 'Anthony', 'marka@lib.de')),
+			array(
+				"211,22,35
+				10,20,33",
+				array(
+					array('211', '22', '35'),
+					array('10', '20', '33'),
+				)
+			),
 		);
 	}
 
